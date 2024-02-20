@@ -1,0 +1,9 @@
+venv/
+polars_test.ipynb
+test.ipynb
+dashboard/__pycache__/
+dashboard/scripts/__pycache__/
+dashboard/scripts/polars_import.py
+.ipynb_checkpoints/
+dashboard/scripts/ingestion_pandas.py
+dashboard/scripts/source_pandas.py
