@@ -1,4 +1,4 @@
-from dashboard import query_data, bar_chart, kpi, table_chart, get_name, candlestick_chart
+from dashboard import query_data, bar_chart, kpi, table_chart, get_name, candlestick_chart, donut_chart
 import streamlit as st
 import sqlite3 as sql
 
@@ -7,13 +7,13 @@ connection = sql.connect("dashboard/financials.db")
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="Finance Dashboard")
     
-    hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+    # hide_streamlit_style = """
+    # <style>
+    # #MainMenu {visibility: hidden;}
+    # footer {visibility: hidden;}
+    # </style>
+    # """
+    # st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
     st.title("Finance Dashboard")
     st.divider()
@@ -32,9 +32,10 @@ if __name__ == "__main__":
 
     with col1:
         financial_data = query_data(ticker, connection)
-        chart = bar_chart(financial_data)
+        chart = bar_chart(financial_data, ticker)
         # table = table_chart(financial_data, "#0FA6AB")
         price1, line_chart1 = candlestick_chart(ticker=ticker)
+        donut = donut_chart(financial_data, ticker)
 
         st.header(f"{name}")
         metric_col1, metric_col2, metric_col3, metric_col4, = st.columns(4)
@@ -51,12 +52,14 @@ if __name__ == "__main__":
         st.plotly_chart(line_chart1, theme=None, use_container_width=True, config={"displayModeBar":False})
         st.plotly_chart(chart, theme=None, use_container_width=True, config={"displayModeBar":False})
         # st.plotly_chart(table, theme=None, use_container_width=True, config={"displayModeBar":False, "staticPlot":True})
+        st.plotly_chart(donut, theme=None, use_container_width=True, config={"displayModeBar":False})
 
     with col2:
         financial_data2 = query_data(ticker2, connection)
-        chart2 = bar_chart(financial_data2)
+        chart2 = bar_chart(financial_data2, ticker)
         # table2 = table_chart(financial_data2, "#0070c0")
         price2, line_chart2 = candlestick_chart(ticker=ticker2)
+        donut2 = donut_chart(financial_data2, ticker)
 
         st.header(f"{name2}")
         second_metric_col1, second_metric_col2, second_metric_col3, second_metric_col4, = st.columns(4)
@@ -73,3 +76,4 @@ if __name__ == "__main__":
         st.plotly_chart(line_chart2, theme=None, use_container_width=True, config={"displayModeBar":False})
         st.plotly_chart(chart2, theme=None, use_container_width=True, config={"displayModeBar":False})
         # st.plotly_chart(table2, theme=None, use_container_width=True, config={"displayModeBar":False, "staticPlot":True})
+        st.plotly_chart(donut2, theme=None, use_container_width=True, config={"displayModeBar":False})

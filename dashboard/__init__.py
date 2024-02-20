@@ -31,7 +31,7 @@ def query_data(ticker, connection):
 
     return df
 
-def bar_chart(df, color="#023047"):
+def bar_chart(df, ticker, color="#023047"):
 
     fig = go.Figure()
 
@@ -48,7 +48,7 @@ def bar_chart(df, color="#023047"):
                     legend = dict(orientation="h", x=1, y=1.02, yanchor="bottom", xanchor="right", font=dict(color="black", size=18)),
                     hoverlabel = dict(font=dict(size = 18, color = "black", family = "arial")),
                     paper_bgcolor = "white", plot_bgcolor = "white",
-                    title=dict(text="<b>Financials Chart</b>", font=dict(size=20, color="black")), title_x=0)
+                    title=dict(text=f"<b>{ticker} Financials Chart</b>", font=dict(size=20, color="black")), title_x=0)
 
     return fig
 
@@ -137,6 +137,23 @@ def candlestick_chart(ticker):
                     showlegend = True, legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "right", x = 1,
                     font = dict(size = 14, color = "black", family = "arial")),
                     yaxis = {"side":"right"}, paper_bgcolor = "white", plot_bgcolor = "white", height = 500,
-                    title=dict(text="<b>Stock Chart</b>", font=dict(size=20, color="black")), title_x=0)
+                    title=dict(text=f"<b>{ticker} Stock Chart</b>", font=dict(size=20, color="black")), title_x=0)
 
     return price, fig
+
+
+def donut_chart(df, ticker):
+    values = [df["Cost of Revenue"].iloc[-4:].sum(), df["R&D"].iloc[-4:].sum(), df["SG&A"].iloc[-4:].sum(), df["Other Operating"].iloc[-4:].sum()]
+    labels = ["Cost of Revenue", "R&D", "SG&A", "Other Operating"]
+    colors = ["#780000", "#c1121f", "#f08080", "#ffdab9"]
+
+    fig = go.Figure()
+    fig.add_trace(go.Pie(values=values, labels=labels, hole=0.45, marker_colors=colors, textfont_size=20, textfont_color="white"))
+
+    fig.update_layout(hovermode = "x unified", hoverlabel = dict(bgcolor = "white", font = dict(size = 18, color = "black")),
+                    showlegend = True, legend = dict(orientation = "h", yanchor = "bottom", y = 1.1, xanchor = "right", x = 1,
+                    font = dict(size = 18, color = "black", family = "arial")),
+                    yaxis = {"side":"right"}, paper_bgcolor = "white", plot_bgcolor = "white", height = 500,
+                    title=dict(text=f"<b>{ticker} TTM Expense Chart</b>", font=dict(size=20, color="black")), title_x=0)
+    
+    return fig
