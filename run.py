@@ -56,10 +56,10 @@ if __name__ == "__main__":
 
     with col2:
         financial_data2 = query_data(ticker2, connection)
-        chart2 = bar_chart(financial_data2, ticker)
+        chart2 = bar_chart(financial_data2, ticker2)
         # table2 = table_chart(financial_data2, "#0070c0")
         price2, line_chart2 = candlestick_chart(ticker=ticker2)
-        donut2 = donut_chart(financial_data2, ticker)
+        donut2 = donut_chart(financial_data2, ticker2)
 
         st.header(f"{name2}")
         second_metric_col1, second_metric_col2, second_metric_col3, second_metric_col4, = st.columns(4)
