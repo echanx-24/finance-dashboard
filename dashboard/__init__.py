@@ -36,11 +36,14 @@ def bar_chart(df, ticker, color="#023047"):
     fig = go.Figure()
 
     fig.add_trace(go.Bar(x=df.index, y=df["Revenue"], name = "Revenue", marker_color=color, hovertemplate="%{y:,d}", offsetgroup=1))
-    fig.add_trace(go.Bar(x=df.index, y=df["Cost of Revenue"], name="Cost Of Revenue", marker_color="#780000", hovertemplate ="%{y:,d}", offsetgroup=2))
-    fig.add_trace(go.Bar(x=df.index, y=df["R&D"], name="R&D", marker_color="#c1121f", hovertemplate="%{y:,d}", offsetgroup=2, base=df["Cost of Revenue"]))
-    fig.add_trace(go.Bar(x = df.index, y = df["SG&A"], name = "SG&A", marker_color = "#f08080", hovertemplate = "%{y:,d}", offsetgroup=2, base=df["R&D"]+df["Cost of Revenue"]))
-    fig.add_trace(go.Bar(x = df.index, y = df["Other Operating"], name = "Other Operating", marker_color = "#ffdab9", hovertemplate = "%{y:,d}",
-                         offsetgroup=2, base=df["R&D"]+df["Cost of Revenue"]+df["SG&A"]))
+    fig.add_trace(go.Bar(x=df.index, y=df["Cost of Revenue"], name="Cost Of Revenue", marker_color="#780000",
+                         customdata=df["Cost of Revenue"], hovertemplate ="%{customdata:,d}", offsetgroup=2))
+    fig.add_trace(go.Bar(x=df.index, y=df["R&D"], name="R&D", marker_color="#c1121f",
+                         customdata=df["R&D"], hovertemplate="%{customdata:,d}", offsetgroup=2, base=df["Cost of Revenue"]))
+    fig.add_trace(go.Bar(x=df.index, y=df["SG&A"], name="SG&A", marker_color="#f08080",
+                         customdata=df["SG&A"],hovertemplate="%{customdata:,d}", offsetgroup=2, base=df["Cost of Revenue"]+df["R&D"]))
+    fig.add_trace(go.Bar(x=df.index, y=df["Other Operating"], name="Other Operating", marker_color="#ffdab9", customdata=df["Other Operating"], 
+                         hovertemplate="%{customdata:,d}", offsetgroup=2,base=df["Cost of Revenue"]+df["R&D"]+df["SG&A"]))
 
     fig.update_xaxes(showgrid = False, tickfont = dict(size=16, color="black"))
     fig.update_yaxes(showgrid = True, tickfont = dict(size=16, color="black"), gridcolor = "#D9D9D9")
