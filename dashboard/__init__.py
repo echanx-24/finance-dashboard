@@ -123,7 +123,7 @@ def candlestick_chart(ticker):
 
     fig = go.Figure()
     fig.add_trace(go.Candlestick(x = df.index, open = df["Open"], close = df["Close"], high = df["High"], low = df["Low"],
-                                increasing_line_color = "black", increasing_line_width = 0.25, increasing_fillcolor = "#089981",
+                                increasing_line_color = "black", increasing_line_width = 0.25, increasing_fillcolor = "#023047",
                                 decreasing_line_color = "black", decreasing_line_width = 0.25, decreasing_fillcolor = "#DC3855",
                                 showlegend = False, name = "<b>Candlestick</b>"))
     fig.add_trace(go.Scatter(x=df.index, y=df["EMA14"], name="<b>EMA 14</b>", line_color="#e26b0a"))
