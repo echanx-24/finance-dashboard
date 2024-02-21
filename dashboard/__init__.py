@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import yfinance as yf
 import warnings
+import psycopg2
 
 def query_data(ticker, connection):
     query = f'''
@@ -156,7 +157,6 @@ def donut_chart(df, ticker):
     fig.update_layout(hovermode = "x unified", hoverlabel = dict(bgcolor = "white", font = dict(size = 18, color = "black")),
                     showlegend = True, legend = dict(orientation = "h", yanchor = "bottom", y = 1.1, xanchor = "right", x = 1,
                     font = dict(size = 18, color = "black", family = "arial")),
-                    yaxis = {"side":"right"}, paper_bgcolor = "white", plot_bgcolor = "white", height = 500,
-                    title=dict(text=f"<b>{ticker} TTM Expense Chart</b>", font=dict(size=20, color="black")), title_x=0)
+                    yaxis = {"side":"right"}, paper_bgcolor = "white", plot_bgcolor = "white", height = 500)
     
     return fig
