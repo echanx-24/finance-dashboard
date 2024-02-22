@@ -51,7 +51,7 @@ def bar_chart(df, ticker, color="#023047"):
                     legend = dict(orientation="h", x=1, y=1.02, yanchor="bottom", xanchor="right", font=dict(color="black", size=18)),
                     hoverlabel = dict(font=dict(size = 18, color = "black", family = "arial")),
                     paper_bgcolor = "white", plot_bgcolor = "white",
-                    title=dict(text=f"<b>{ticker} Financials Chart</b>", font=dict(size=20, color="black")), title_x=0)
+                    title=dict(text=f"<b>{ticker} Financials Chart (000s)</b>", font=dict(size=20, color="black")), title_x=0)
 
     return fig
 
