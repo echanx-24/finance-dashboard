@@ -16,13 +16,31 @@ if __name__ == "__main__":
     st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
     st.title("Finance Dashboard")
+    st.markdown("Author: <b>Ethan Chan</b>", unsafe_allow_html=True)
+
     st.divider()
 
-    symbol_list = ["PEGA", "PATH", "CRM", "BB", "DOCN", "AKAM", "SNOW", "DDOG", "AMD", "NOW", "MSFT", "SQ", "TSLA",
+    with st.expander("About Project", expanded=True):
+            
+            st.markdown(
+            """
+            This Streamlit Dashboard is a personal project that focuses on aggregating financial data for public companies 
+            into a simple and digestable format for end users. Data is taken from the SEC's EDGAR API. 
+            I am NOT affiliated with the SEC.
+
+            <b>Disclaimer</b>: the content on this dashboard should be used for informational purposes only and should NOT 
+            be used as financial advice. Invest at your own risk.
+
+            Full codebase can be accessed on GitHub: https://github.com/echanx-24/sec-streamlit
+            """,
+            unsafe_allow_html=True)
+
+    symbol_list = ["DOCN", "AKAM", "SNOW", "DDOG", "PEGA", "PATH", "CRM", "BB", "AMD", "NOW", "MSFT", "SQ", "TSLA",
                "NVDA", "ADBE", "ROKU", "AAPL", "INTC", "GOOGL", "RBLX", "ZM", "U", "PANW", "SNPS", "CRWD",
                "TEAM", "ZS", "VEEV", "MDB", "NET", "PTC", "BSY", "NTNX", "GEN", "TOST", "MSTR", "DOCU", "DBX", "ALTR",
                "FIVN", "WK", "BLKB", "AI", "APPN", "SWI", "BLZE", "OSPN", "ME", "RBLX"]
 
+    about = st.sidebar.markdown("Public Company Selection")
     ticker = st.sidebar.selectbox(label="First Company", index=0, options=symbol_list)
     ticker2 = st.sidebar.selectbox(label="Second Company", index=1, options=symbol_list)
     
