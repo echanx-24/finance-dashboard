@@ -35,14 +35,12 @@ def ticker_data():
     cursor.executemany("INSERT INTO company (CIK, NAME, TICKER) VALUES (?,?,?)", df_tuples)
     connection.commit()
 
-    return df[["cik_str","title", "ticker"]]
-
 # upload_tickers = ticker_data()
 
-cursor.execute("DROP TABLE INCOME_STATEMENT_QTR")
+cursor.execute("DROP TABLE IF EXISTS income_statement_qtr")
 
 profit_table = '''
-    CREATE TABLE IF NOT EXISTS INCOME_STATEMENT_QTR
+    CREATE TABLE IF NOT EXISTS income_statement_qtr
         (ID INTEGER PRIMARY KEY,
         DATE TEXT NOT NULL,
         YEAR TEXT NOT NULL,

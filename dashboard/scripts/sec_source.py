@@ -1,6 +1,8 @@
 import requests
 import sqlite3 as sql
 import polars as pl
+import psycopg2
+from collections import deque
 
 class Stock:
 
@@ -16,6 +18,10 @@ class Stock:
 
     connection = sql.connect("dashboard/financials.db")
     cursor = connection.cursor()
+
+    connection_psql = psycopg2.connect(host="localhost", dbname="postgres", user="postgres",
+                              password="postgres", port=5432)
+    cur = connection_psql.cursor()
 
     def __init__(self, ticker):
         self.ticker = ticker
@@ -40,12 +46,21 @@ class Stock:
         json_data = response.json()
         return json_data
     
+    def get_account_simple(self, account):
+        data = self.company_facts()
+        df = pl.DataFrame(data["facts"]["us-gaap"][account]["units"]["USD"])
+        df = df.filter((pl.col("form")=="10-K") | (pl.col("form")=="10-Q"))
+        df = df.unique(subset=["end"])
+        df = df.with_columns(pl.col("end").str.to_date("%Y-%m-%d"))
+        df = df.sort(pl.col("end"), descending=False)
+        return df[-8:]
+    
     def get_account(self, account):
         data = self.company_facts()
         df = pl.DataFrame(data["facts"]["us-gaap"][account]["units"]["USD"])
         df = df.select(["start", "end", "fy", "fp", "form", "frame", "val"])
         
-        times = [2021, 2022, 2023]
+        times = [2021, 2022, 2023, 2024]
         elements = []
         for time in times:
             df2 = df.filter(
@@ -92,6 +107,47 @@ class Stock:
 
         return df
     
+    def get_account_fcf(self, account):
+        data = self.company_facts()
+        df = pl.DataFrame(data["facts"]["us-gaap"][account]["units"]["USD"])
+        df = df.filter((pl.col("form")=="10-K") | (pl.col("form")=="10-Q"))
+        df = df.unique(subset=["end"])
+        df = df.with_columns(pl.col("end").str.to_date("%Y-%m-%d"))
+        df = df.sort(pl.col("end"), descending=False)
+        df = df.with_columns(year=pl.col("end").dt.year())
+        df = df.select(["start", "end", "year", "fy", "fp", "form", "val"])
+        return df[-8:]
+    
+    def build_cash_table(self):
+        accounts = ["NetCashProvidedByUsedInOperatingActivities", "PaymentsToAcquirePropertyPlantAndEquipment"]
+        queue = deque()
+        times = [2021, 2022, 2023]
+        for account in accounts:
+            elements = []
+            df = self.get_account_fcf(account)
+            for time in times:
+                df2 = df.filter(pl.col("year")==time)
+
+                # Cash Flow numbers are cumulative, so need to recalculated amounts for specific qurater
+                df2 = df2.with_columns(recalculated=pl.col("val").diff().fill_null(value=pl.col("val").first()))
+                df2 = df2.rename({"val":account, "recalculated":f"{account}_recalc"})
+                elements.append(df2)
+
+            df_master = pl.concat([elements[0], elements[1], elements[2]])
+            queue.appendleft(df_master)
+
+        on = ["start", "end", "year", "fy", "fp", "form"]
+        df3 = queue.pop()
+        while len(queue):
+            df3 = df3.join(queue.pop(), on=on)
+        df3 = df3.with_columns(pl.col("end").dt.strftime("%b-%Y"))
+        df3 = df3.with_columns(pl.Series(name="ticker",values=[self.ticker]*len(df3.select(pl.col("end")))))
+        df3 = df3.select(pl.col(["end", "year", "fp", "NetCashProvidedByUsedInOperatingActivities",
+                           "NetCashProvidedByUsedInOperatingActivities_recalc",
+                           "PaymentsToAcquirePropertyPlantAndEquipment",
+                           "PaymentsToAcquirePropertyPlantAndEquipment_recalc", "ticker"]))
+        return df3.rows()
+    
     def insert_data(self, data, cursor=cursor, connection=connection):
         insert = '''
             INSERT INTO INCOME_STATEMENT_QTR
@@ -105,4 +161,30 @@ class Stock:
         else:
             cursor.execute(insert)
             connection.commit()
+        return
+    
+    def insert_data_psql(self, data, cursor=cur, connection=connection_psql):
+        insert = '''
+            INSERT INTO income_statement_qtr
+            (date, year, qtr, timeframe, revenue, costOfRevenue, grossProfit, research, 
+            sga, otherOperating, operatingExp, operatingInc, ticker)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        # if len(data)>1 and type(data) == list:
+        cursor.executemany(insert, data)
+        connection.commit()
+        # else:
+        #     cursor.execute(insert)
+        #     connection.commit()
+        return
+    
+    def insert_cash_psql(self, data, cursor=cur, connection=connection_psql):
+        insert = """
+            INSERT INTO cash_flow_statement
+            (date, year, qtr, operatingCashFlowCum, operatingCashFlowQtr, investmentPPECum,
+            investmentPPEQtr, ticker)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.executemany(insert, data)
+        connection.commit()
         return

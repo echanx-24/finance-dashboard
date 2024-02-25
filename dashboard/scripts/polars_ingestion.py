@@ -1,8 +1,9 @@
-import pandas as pd
+
 from sec_source import Stock
 from timeit import default_timer as timer
 import polars as pl
 from collections import deque
+import psycopg2
 
 class BlackBerry(Stock):
     
@@ -17,7 +18,7 @@ class BlackBerry(Stock):
             data = self.get_account(account)
             queue.appendleft(data)
         
-        on = ["start", "end", "fy", "quarter", "form", "frame"]
+        on = ["start", "end", "year","fy", "quarter", "form", "frame"]
         df = queue.pop()
         for i in range(len(queue)):
             if len(queue) == 0:
@@ -39,8 +40,10 @@ class BlackBerry(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 class UiPath(Stock):
 
@@ -80,8 +83,10 @@ class UiPath(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-        
-        return df.rows()  
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df 
 
 class CRM(Stock):
 
@@ -122,8 +127,10 @@ class CRM(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 class GOOGL(Stock):
 
@@ -166,8 +173,10 @@ class GOOGL(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 
 class MSFT(Stock):
@@ -211,8 +220,10 @@ class MSFT(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-        
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 class ADBE(Stock):
 
@@ -253,8 +264,10 @@ class ADBE(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-        
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 class AMD(Stock):
 
@@ -295,8 +308,10 @@ class AMD(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-        
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 
 class RBLX(Stock):
@@ -340,8 +355,10 @@ class RBLX(Stock):
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
-        
-        return df.rows()
+        df = df.rows()
+        if len(df) < 1:
+            return
+        return df
 
 symbol_list = ["PEGA", "PATH", "CRM", "BB", "SNOW", "DDOG", "AKAM", "DOCN", "AMD", "NOW", "MSFT", "SQ", "TSLA",
                "NVDA", "ADBE", "ROKU", "AAPL", "INTC", "GOOGL", "RBLX", "ZM", "U", "PANW", "SNPS", "CRWD",
@@ -368,69 +385,82 @@ def determine(tickers):
         method7 = ADBE(ticker=ticker)
         method8 = RBLX(ticker=ticker)
         try:
-            data = method1.build_table()
-            method1.insert_data(data)
+            method1.insert_data(method1.build_table())
             elements_found.append((ticker, "BB Method"))
             # symbol_list.append(ticker)
         except:
             try:
-                data = method2.build_table()
-                method2.insert_data(data)
+                method2.insert_data(method2.build_table())
                 elements_found.append((ticker, "PATH Method"))
                 # symbol_list.append(ticker)
             except:
                 try:
-                    data = method3.build_table()
-                    method3.insert_data(data)
+                    method3.insert_data(method3.build_table())
                     elements_found.append((ticker, "CRM Method"))
                     # symbol_list.append(ticker)
                 except:
                     try:
-                        data = method4.build_table()
-                        method4.insert_data(data)
+                        method4.insert_data(method4.build_table())
                         elements_found.append((ticker, "GOOGL Method"))
                         # symbol_list.append(ticker)
                     except:
                         try:
-                            data = method5.build_table()
-                            method5.insert_data(data)
+                            method5.insert_data(method5.build_table())
                             elements_found.append((ticker, "MSFT Method"))
                             # symbol_list.append(ticker)
                         except:
                             try:
-                                data = method6.build_table()
-                                method6.insert_data(data)
+                                method6.insert_data(method6.build_table())
                                 elements_found.append((ticker, "AMD Method"))
                                 # symbol_list.append(ticker)
                             except:
                                 try:
-                                    data = method7.build_table()
-                                    method7.insert_data(data)
+                                    method7.insert_data(method7.build_table())
                                     elements_found.append((ticker, "ADBE Method"))
                                     # symbol_list.append(ticker)
                                 except:
                                     try:
-                                        data = method8.build_table()
-                                        method8.insert_data(data)
+                                        method8.insert_data(method8.build_table())
                                         elements_found.append((ticker, "RBLX Method"))
                                     except:
                                         elements_error.append(ticker)
 
     return elements_found, elements_error
 
+def cash_flow_data(companies):
+    success = []
+    fail = []
+    for company in companies:
+        try:
+            stock = Stock(ticker=company)
+            data = stock.build_cash_table()
+            stock.insert_cash_psql(data=data)
+            success.append(company)
+        except Exception as error:
+            print(company, ":", error)
+            fail.append(company)
+    return success, fail
+
+# data = cash_flow_data(symbol_list)
+# print("Success:", data[0])
+# print("Failure:", data[1])
+
+stock = Stock(ticker="PANW")
+# print(stock.build_cash_table())
+print(stock.get_account_fcf("NetCashProvidedByUsedInOperatingActivities"))
+print(stock.get_account_fcf("PaymentsToAcquirePropertyPlantAndEquipment"))
+
 # start = timer()
 # check = determine(tickers=symbol_list)
-
 # end = timer()
 # print("Success:", check[0])
 # print()
 # print("Failure:", check[1])
 # print("Time:", end-start)
 
-# data["facts"]["dei"] Common Stock Shares Outstanding
+# stock = BlackBerry(ticker="PEGA")
+# print(stock.get_account_simple("DepreciationDepletionAndAmortization"))
+# print(stock.get_account_simple("PropertyPlantAndEquipmentGross"))
+# print(stock.get_account_simple("Depreciation"))
 
-akam = GOOGL(ticker="AKAM")
-data = akam.company_facts()
-df = pl.DataFrame(data["facts"]["us-gaap"]["CostOfRevenue"]["units"]["USD"])
-# df = df.filter(pl.col("form")=="10-K")
-print(df)
+# data["facts"]["dei"] Common Stock Shares Outstanding
