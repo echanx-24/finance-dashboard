@@ -3,7 +3,6 @@ from sec_source import Stock
 from timeit import default_timer as timer
 import polars as pl
 from collections import deque
-import psycopg2
 
 class BlackBerry(Stock):
     
@@ -18,7 +17,7 @@ class BlackBerry(Stock):
             data = self.get_account(account)
             queue.appendleft(data)
         
-        on = ["start", "end", "year","fy", "quarter", "form", "frame"]
+        on = ["start", "end", "fy", "quarter", "form", "frame"]
         df = queue.pop()
         for i in range(len(queue)):
             if len(queue) == 0:
@@ -36,7 +35,7 @@ class BlackBerry(Stock):
                                    values=[str(i[0]) + " " + str(j[0]) for i, j in zip(df.select(pl.col("year")).rows(),
                                                                                 df.select(pl.col("quarter")).rows())]))
 
-        df = df.select(pl.col(["date", "year", "quarter", "timeframe", "Revenues",
+        df = df.select(pl.col(["date", "end", "quarter", "timeframe", "Revenues",
                            "CostOfRevenue", "GrossProfit","ResearchAndDevelopmentExpense",
                            "SellingGeneralAndAdministrativeExpense","OtherOperating",
                            "OperatingExpenses", "OperatingIncome", "ticker"]))
@@ -387,37 +386,30 @@ def determine(tickers):
         try:
             method1.insert_data(method1.build_table())
             elements_found.append((ticker, "BB Method"))
-            # symbol_list.append(ticker)
         except:
             try:
                 method2.insert_data(method2.build_table())
                 elements_found.append((ticker, "PATH Method"))
-                # symbol_list.append(ticker)
             except:
                 try:
                     method3.insert_data(method3.build_table())
                     elements_found.append((ticker, "CRM Method"))
-                    # symbol_list.append(ticker)
                 except:
                     try:
                         method4.insert_data(method4.build_table())
                         elements_found.append((ticker, "GOOGL Method"))
-                        # symbol_list.append(ticker)
                     except:
                         try:
                             method5.insert_data(method5.build_table())
                             elements_found.append((ticker, "MSFT Method"))
-                            # symbol_list.append(ticker)
                         except:
                             try:
                                 method6.insert_data(method6.build_table())
                                 elements_found.append((ticker, "AMD Method"))
-                                # symbol_list.append(ticker)
                             except:
                                 try:
                                     method7.insert_data(method7.build_table())
                                     elements_found.append((ticker, "ADBE Method"))
-                                    # symbol_list.append(ticker)
                                 except:
                                     try:
                                         method8.insert_data(method8.build_table())
@@ -436,6 +428,7 @@ def cash_flow_data(companies):
             data = stock.build_cash_table()
             stock.insert_cash_psql(data=data)
             success.append(company)
+            print("Success:", company)
         except Exception as error:
             print(company, ":", error)
             fail.append(company)
@@ -445,18 +438,18 @@ def cash_flow_data(companies):
 # print("Success:", data[0])
 # print("Failure:", data[1])
 
-stock = Stock(ticker="PANW")
+# stock = Stock(ticker="PEGA")
 # print(stock.build_cash_table())
-print(stock.get_account_fcf("NetCashProvidedByUsedInOperatingActivities"))
-print(stock.get_account_fcf("PaymentsToAcquirePropertyPlantAndEquipment"))
+# print(stock.get_account_fcf("NetCashProvidedByUsedInOperatingActivities"))
+# print(stock.get_account_fcf("PaymentsToAcquirePropertyPlantAndEquipment"))
 
-# start = timer()
-# check = determine(tickers=symbol_list)
-# end = timer()
-# print("Success:", check[0])
-# print()
-# print("Failure:", check[1])
-# print("Time:", end-start)
+start = timer()
+check = determine(tickers=symbol_list)
+end = timer()
+print("Success:", check[0])
+print()
+print("Failure:", check[1])
+print("Time:", end-start)
 
 # stock = BlackBerry(ticker="PEGA")
 # print(stock.get_account_simple("DepreciationDepletionAndAmortization"))

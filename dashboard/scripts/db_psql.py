@@ -71,6 +71,7 @@ cash_table = """
         operatingCashFlowQtr BIGINT NOT NULL,
         investmentPPECum BIGINT NOT NULL,
         investmentPPEQtr BIGINT NOT NULL,
+        freeCashFlow BIGINT NOT NULL,
         ticker TEXT NOT NULL,
         FOREIGN KEY (ticker) REFERENCES company (ticker));"""
 

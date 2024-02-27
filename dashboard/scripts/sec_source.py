@@ -116,7 +116,7 @@ class Stock:
         df = df.sort(pl.col("end"), descending=False)
         df = df.with_columns(year=pl.col("end").dt.year())
         df = df.select(["start", "end", "year", "fy", "fp", "form", "val"])
-        return df[-8:]
+        return df
     
     def build_cash_table(self):
         accounts = ["NetCashProvidedByUsedInOperatingActivities", "PaymentsToAcquirePropertyPlantAndEquipment"]
@@ -142,10 +142,11 @@ class Stock:
             df3 = df3.join(queue.pop(), on=on)
         df3 = df3.with_columns(pl.col("end").dt.strftime("%b-%Y"))
         df3 = df3.with_columns(pl.Series(name="ticker",values=[self.ticker]*len(df3.select(pl.col("end")))))
+        df3 = df3.with_columns(freeCashFlow=pl.col("NetCashProvidedByUsedInOperatingActivities_recalc").sub(pl.col("PaymentsToAcquirePropertyPlantAndEquipment_recalc")))
         df3 = df3.select(pl.col(["end", "year", "fp", "NetCashProvidedByUsedInOperatingActivities",
                            "NetCashProvidedByUsedInOperatingActivities_recalc",
                            "PaymentsToAcquirePropertyPlantAndEquipment",
-                           "PaymentsToAcquirePropertyPlantAndEquipment_recalc", "ticker"]))
+                           "PaymentsToAcquirePropertyPlantAndEquipment_recalc", "freeCashFlow", "ticker"]))
         return df3.rows()
     
     def insert_data(self, data, cursor=cursor, connection=connection):
@@ -158,9 +159,9 @@ class Stock:
         if len(data)>1 and type(data) == list:
             cursor.executemany(insert, data)
             connection.commit()
-        else:
-            cursor.execute(insert)
-            connection.commit()
+        # else:
+        #     cursor.execute(insert)
+        #     connection.commit()
         return
     
     def insert_data_psql(self, data, cursor=cur, connection=connection_psql):
@@ -182,8 +183,8 @@ class Stock:
         insert = """
             INSERT INTO cash_flow_statement
             (date, year, qtr, operatingCashFlowCum, operatingCashFlowQtr, investmentPPECum,
-            investmentPPEQtr, ticker)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            investmentPPEQtr, freeCashFlow, ticker)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.executemany(insert, data)
         connection.commit()
